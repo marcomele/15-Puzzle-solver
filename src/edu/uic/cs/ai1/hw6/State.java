@@ -7,7 +7,7 @@ import java.util.function.Function;
  * a node of the search. The state is internally represented as a
  * 4-by-4 array of integers. Provides a {@link State.Direction} variable type.
  * @author Marco Mele
- *
+ * @since 1.8
  */
 
 public class State {
@@ -22,15 +22,35 @@ public class State {
 		DOWN
 	}
 	
+	/**
+	 * Computes the Manhattan (city block) distance of a state
+	 * from the solution.
+	 * @param A {@link State}
+	 * @return an integer distance	
+	 * @since 1.8
+	 */
+	
 	public static Function<State, Integer> manhattan = (state -> {
-		int distance = 0, i = 1;
-		for(int[] row : state.state)
-			for(int cell : row) {
-				distance += cell != 0 ? Math.abs(cell - i) : Math.abs(16 - i);
-				i ++;
+		int distance = 0;
+		for(int i = 0; i < 4; i ++)
+			for(int j = 0; j < 4; j ++) {
+				int[] correct = correct(state.state[i][j] != 0 ? state.state[i][j] - 1 : 15);
+				distance += Math.abs(correct[0] - i) + Math.abs(correct[1] - j);
 			}
 		return new Integer(distance);
 	});
+	
+	private static int[] correct(int n) {
+		return new int[] {Math.floorDiv(n, 4), n % 4};
+	}
+	
+	/**
+	 * Computes the Hamming distance (number of misplaced tiles) of a state
+	 * from the solution.
+	 * @param A {@link State}
+	 * @return an integer distance	
+	 * @since 1.8
+	 */
 	
 	public static Function<State, Integer> hamming = (state -> {
 		int distance = 0, i = 1;
@@ -77,17 +97,42 @@ public class State {
 				throw new InvalidStateRepresentationException();
 	}
 	
+	/**
+	 * 
+	 * @return the cost of reaching the current state from the starting state
+	 */
+	
 	public int getgScore() {
 		return gScore;
 	}
+	
+	/**
+	 * Set the cost of reaching the current state from the starting state
+	 */
 
 	public void setgScore(int gScore) {
 		this.gScore = gScore;
 	}
+	
+	/**
+	 * 
+	 * @return the heuristic evaluation of the cost of reaching the solution from the current state---
+	 * might be an invalid value if the cost is yet to be evaluated, i.e. the method {@link sethScore(Function<T,R>)}
+	 * has never been invoked on this instance.
+	 */
 
 	public int gethScore() {
 		return hScore;
 	}
+	
+	/**
+	 * Evaluates the cost to the solution based on the provided heuristic.
+	 * @param heuristic a {@code Function<State, Integer>} that evaluates a distance measure
+	 * based on the state evaluation. Must implement the {@link Function<T,R>} functional interface and its
+	 * {@code R Function<T,R>.apply(T t)} method, must be either a named class, an Anonymous Inner class
+	 * or a lambda function.
+	 * @since 1.8
+	 */
 
 	public void sethScore(Function<State, Integer> heuristic) {
 		this.hScore = heuristic.apply(this);
@@ -204,14 +249,20 @@ public class State {
 	}
 	
 	/**
-	 * Comparator for two states.
+	 * Checks if two State objects are the same exact node in both state and score.
 	 * @param other A State object
-	 * @return {@code true} if the internal representations of the two states is the same, {@code false} otherwise.
+	 * @return {@code true} if the two nodes are the same, {@code false} otherwise.
 	 */
 	
 	public boolean equals(State other) {
 		return this.sameStateOf(other) ? this.getfScore() == other.getfScore() : false;
 	}
+	
+	/**
+	 * Checks if two State objects represent the same state but not necessarily the same node.
+	 * @param other A State object
+	 * @return {@code true} if the internal representations of the two states is the same, {@code false} otherwise.
+	 */
 	
 	public boolean sameStateOf(State other) {
 		for(int i = 0; i < 4; i ++)
