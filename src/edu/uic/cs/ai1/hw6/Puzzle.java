@@ -39,7 +39,7 @@ public class Puzzle {
 						
 				System.out.println("Performing search with Manhattan distance...");
 				State solutionManhattan = AStarSearch(initialState, State.manhattan);
-				System.out.println("\nSolution found with Manhattan distance:");
+				System.out.println("\nSolution found with Manhattan distance in " + solutionManhattan.getgScore() + " steps:");
 				System.out.println(solutionManhattan);
 				
 				long endTime = System.currentTimeMillis();
@@ -61,7 +61,7 @@ public class Puzzle {
 						
 				System.out.println("Performing search with Hamming distance...");
 				State solutionHamming = AStarSearch(initialState, State.hamming);
-				System.out.println("\nSolution found with Manhattan distance:");
+				System.out.println("\nSolution found with Hamming distance in " + solutionHamming.getgScore() + " steps:");
 				System.out.println(solutionHamming);
 				
 				long endTime = System.currentTimeMillis();
@@ -93,6 +93,8 @@ public class Puzzle {
 		/* create empty explored list and the frontier containing only the initial state */
 		TreeSet<State> frontier = new TreeSet<>((a,b) -> a.getfScore() - b.getfScore());
 		HashSet<State> explored = new HashSet<>();
+		initialState.setgScore(0);
+		initialState.sethScore(a -> 0);
 		frontier.add(initialState);
 		
 		/* perform search */
@@ -101,6 +103,7 @@ public class Puzzle {
 			/* get the best node in the frontiers, based on f = g + h */
 			State currentNode = frontier.pollFirst();
 			explored.add(currentNode);
+			System.err.println("current node:\n" + currentNode);
 			
 			/* exploit each possible actions for the current node */
 			for(Direction direction : Direction.values()) {
@@ -109,11 +112,11 @@ public class Puzzle {
 					/* check if already explored */
 					if(isIn(explored, childNode))
 						continue;
-					childNode.setgScore(currentNode.getgScore());
+					childNode.setgScore(currentNode.getgScore() + 1);
 					childNode.sethScore(heuristic);
 					/* if a node with same state and lower f is present in the frontier, continue */
 					/* otherwise, add---or replace with---this */
-					if(frontier.removeIf(node -> node.sameStateOf(childNode) && node.getfScore() > childNode.getfScore()))
+					if(!isIn(frontier, childNode) || frontier.removeIf(node -> node.sameStateOf(childNode) && node.getfScore() > childNode.getfScore()))
 						frontier.add(childNode);
 				} catch (InvalidMoveException e) {}
 			}
