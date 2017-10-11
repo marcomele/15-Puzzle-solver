@@ -18,51 +18,30 @@ public class Puzzle {
 	public static void main(String[] args) throws IOException {
 		
 		File inputFile = new File("initialState");
-		BufferedReader inputBuffer = null;
-		
-		try {		
-			/* Read initial state from file */	
-			System.out.print("Parsing input file... ");
-			inputBuffer = new BufferedReader(new FileReader(inputFile));
-			String[] lines = new String[3];
-			lines = inputBuffer.lines().collect(Collectors.toList()).toArray(lines);
-			inputBuffer.close();
-		
-			State initialState = new State(lines);
-			System.out.println("done.");
-				
-			try { /* MANHATTAN DISTANCE */
-		
-				long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-				long totalBefore = Runtime.getRuntime().totalMemory();
-				long startTime = System.currentTimeMillis();
-						
-				System.out.println("Performing search with Manhattan distance...");
-				State solutionManhattan = AStarSearch(initialState, State.manhattan);
-				System.out.println("\nSolution found with Manhattan distance in " + solutionManhattan.getgScore() + " steps:");
-				System.out.println(solutionManhattan);
-				
-				long endTime = System.currentTimeMillis();
-				long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-				
-				System.out.println("\nExecution terminated in " + (endTime - startTime) + "ms");
-				System.out.println("Memory used: " + (memoryAfter - memoryBefore) / 1024 + "KB");
-				if(totalBefore != Runtime.getRuntime().totalMemory())
-					System.err.println("The memory measure is wrong!");
-			} catch (NoSolutionException e) {
-			System.err.println("\nNo solution found");
-			}
+		Function<State, Integer> heuristic = State.manhattan;
 			
-			try { /* HAMMING DISTANCE */
+		try {		
+							
+			try {
 				
 				long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 				long totalBefore = Runtime.getRuntime().totalMemory();
 				long startTime = System.currentTimeMillis();
+				
+				/* Read initial state from file */	
+				System.out.print("Parsing input file... ");
+				BufferedReader inputBuffer = new BufferedReader(new FileReader(inputFile));
+				String[] lines = new String[3];
+				lines = inputBuffer.lines().collect(Collectors.toList()).toArray(lines);
+				inputBuffer.close();
+			
+				State initialState = new State(lines);
+				System.out.println("done.");
 						
-				System.out.println("Performing search with Hamming distance...");
-				State solutionHamming = AStarSearch(initialState, State.hamming);
-				System.out.println("\nSolution found with Hamming distance in " + solutionHamming.getgScore() + " steps:");
-				System.out.println(solutionHamming);
+				System.out.println("Performing search...");
+				State solution = AStarSearch(initialState, heuristic);
+				System.out.println("\nSolution found in " + solution.getgScore() + " steps:");
+				System.out.println(solution);
 				
 				long endTime = System.currentTimeMillis();
 				long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -84,6 +63,16 @@ public class Puzzle {
 		
 	}
 	
+	/**
+	 * Performs the A* search for a solution starting from the given node, and applying the given heuristic for estimating
+	 * the cost towards the solution. Known-path cost is node depth.
+	 * @param initialState An initial {@link State}
+	 * @param heuristic A functional interface (named class, anonymous inner class, lambda function)
+	 * @return a solution {@link State}, if found
+	 * @throws NoSolutionException if no solution is found
+	 * @since 1.8
+	 */
+	
 	private static State AStarSearch(State initialState, Function<State, Integer> heuristic) throws NoSolutionException {
 		
 		/* check if the initial state is a solution */
@@ -94,17 +83,16 @@ public class Puzzle {
 		TreeSet<State> frontier = new TreeSet<>((a,b) -> a.getfScore() - b.getfScore());
 		HashSet<State> explored = new HashSet<>();
 		initialState.setgScore(0);
-		initialState.sethScore(a -> 0);
+		initialState.sethScore(heuristic);
 		frontier.add(initialState);
 		
 		/* perform search */
 		while(!frontier.isEmpty()) {
-			
 			/* get the best node in the frontiers, based on f = g + h */
 			State currentNode = frontier.pollFirst();
 			explored.add(currentNode);
-			System.err.println("current node:\n" + currentNode);
-			
+			if(currentNode.isSolution())
+				return currentNode;
 			/* exploit each possible actions for the current node */
 			for(Direction direction : Direction.values()) {
 				try {
