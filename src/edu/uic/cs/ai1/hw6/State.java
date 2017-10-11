@@ -1,5 +1,7 @@
 package edu.uic.cs.ai1.hw6;
 
+import java.util.function.Function;
+
 /**
  * Represents a state, either initial or during search. Is itself
  * a node of the search. The state is internally represented as a
@@ -11,12 +13,36 @@ package edu.uic.cs.ai1.hw6;
 public class State {
 	
 	private int[][] state = new int[4][4];
+	private int gScore = -1;
+	private int hScore = -1;
 	public enum Direction {
 		LEFT,
 		RIGHT,
 		UP,
 		DOWN
 	}
+	
+	public static Function<State, Integer> manhattan = (state -> {
+		int distance = 0, i = 1;
+		for(int[] row : state.state)
+			for(int cell : row) {
+				distance += cell != 0 ? Math.abs(cell - i) : Math.abs(16 - i);
+				i ++;
+			}
+		return new Integer(distance);
+	});
+	
+	public static Function<State, Integer> hamming = (state -> {
+		int distance = 0, i = 1;
+		for(int[] row : state.state)
+			for(int cell : row) {
+				if(cell != i)
+					if(i != 16 || cell != 0)
+						distance ++;
+				i ++;
+			}
+		return new Integer(distance);
+	});
 	
 	/**
 	 * Constructs a new state representation from row arrays of integers.
@@ -51,6 +77,26 @@ public class State {
 				throw new InvalidStateRepresentationException();
 	}
 	
+	public int getgScore() {
+		return gScore;
+	}
+
+	public void setgScore(int gScore) {
+		this.gScore = gScore;
+	}
+
+	public int gethScore() {
+		return hScore;
+	}
+
+	public void sethScore(Function<State, Integer> heuristic) {
+		this.hScore = heuristic.apply(this);
+	}
+	
+	public int getfScore() {
+		return gScore + hScore;
+	}
+
 	/**
 	 * Check if this state is a solution.
 	 * @return {@code true} if it is a solution, {@code false} otherwise.
@@ -164,6 +210,10 @@ public class State {
 	 */
 	
 	public boolean equals(State other) {
+		return this.sameStateOf(other) ? this.getfScore() == other.getfScore() : false;
+	}
+	
+	public boolean sameStateOf(State other) {
 		for(int i = 0; i < 4; i ++)
 			for(int j = 0; j < 4; j ++)
 				if(this.state[i][j] != other.state[i][j])
