@@ -163,7 +163,7 @@ public class State {
 	 * @return {@code true} if the internal representations of the two states is the same, {@code false} otherwise.
 	 */
 	
-	public boolean sameStateOf(State other) {
+	public boolean equals(State other) {
 		for(int i = 0; i < 4; i ++)
 			for(int j = 0; j < 4; j ++)
 				if(this.state[i][j] != other.state[i][j])
