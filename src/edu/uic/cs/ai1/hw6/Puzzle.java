@@ -105,7 +105,7 @@ public class Puzzle {
 	
 	private static boolean isIn(LinkedList<State> list, State node) {
 		for(State visited : list)
-			if(visited.sameStateOf(node))
+			if(visited.equals(node))
 				return true;
 		return false;
 	}
