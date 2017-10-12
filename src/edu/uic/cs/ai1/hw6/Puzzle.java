@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -79,7 +80,7 @@ public class Puzzle {
 			return initialState;
 		
 		/* create empty explored list and the frontier containing only the initial state */
-		TreeSet<State> frontier = new TreeSet<>((a,b) -> a.getfScore() - b.getfScore());
+		PriorityQueue<State> frontier = new PriorityQueue<>((a,b) -> a.getfScore() - b.getfScore());
 		HashSet<State> explored = new HashSet<>();
 		initialState.setgScore(0);
 		initialState.sethScore(heuristic);
@@ -88,7 +89,7 @@ public class Puzzle {
 		/* perform search */
 		while(!frontier.isEmpty()) {
 			/* get the best node in the frontiers, based on f = g + h */
-			State currentNode = frontier.pollFirst();
+			State currentNode = frontier.poll();
 			if(currentNode.isSolution())
 				return currentNode;
 			explored.add(currentNode);
@@ -102,10 +103,9 @@ public class Puzzle {
 					/* apply metrics */
 					childNode.setgScore(currentNode.getgScore() + 1);
 					childNode.sethScore(heuristic);
-					System.err.println(childNode.getfScore());
 					/* if a node with same state and lower f is present in the frontier, continue */
 					/* otherwise, add---or replace with---this */
-					if(!isIn(frontier, childNode) || frontier.removeIf(node -> node.sameStateOf(childNode) && node.getfScore() > childNode.getfScore()))
+					if(!isIn(frontier, childNode) || frontier.removeIf(node -> (node.sameStateOf(childNode) && (node.getfScore() > childNode.getfScore()))))
 						frontier.add(childNode);
 				} catch (InvalidMoveException e) {}
 			}
@@ -126,6 +126,10 @@ public class Puzzle {
 			if(visited.sameStateOf(node))
 				return true;
 		return false;
+	}
+	
+	private static boolean isIn(PriorityQueue<State> pq, State state) {
+		return isIn(pq.stream().collect(Collectors.toSet()), state);
 	}
 
 }
