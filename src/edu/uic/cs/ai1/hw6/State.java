@@ -34,7 +34,9 @@ public class State {
 		int distance = 0;
 		for(int i = 0; i < 4; i ++)
 			for(int j = 0; j < 4; j ++) {
-				int[] correct = correct(state.state[i][j] != 0 ? state.state[i][j] - 1 : 15);
+				if(state.state[i][j] == 0)
+					continue;
+				int[] correct = correct(state.state[i][j] - 1);
 				distance += Math.abs(correct[0] - i) + Math.abs(correct[1] - j);
 			}
 		return new Integer(distance);
@@ -56,9 +58,8 @@ public class State {
 		int distance = 0, i = 1;
 		for(int[] row : state.state)
 			for(int cell : row) {
-				if(cell != i)
-					if(i != 16 || cell != 0)
-						distance ++;
+				if(cell != i && cell != 0)
+					distance ++;
 				i ++;
 			}
 		return new Integer(distance);
