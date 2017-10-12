@@ -129,7 +129,7 @@ public class State {
 	 * Evaluates the cost to the solution based on the provided heuristic.
 	 * @param heuristic a {@code Function<State, Integer>} that evaluates a distance measure
 	 * based on the state evaluation. Must implement the {@link Function<T,R>} functional interface and its
-	 * {@code R Function<T,R>.apply(T t)} method, must be either a named class, an Anonymous Inner class
+	 * {@code R Function<T,R>.apply(T t)} method, must be either a named class, or be a Functional Interface, an Anonymous Inner class
 	 * or a lambda function.
 	 * @since 1.8
 	 */

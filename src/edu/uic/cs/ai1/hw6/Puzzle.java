@@ -102,6 +102,7 @@ public class Puzzle {
 						continue;
 					childNode.setgScore(currentNode.getgScore() + 1);
 					childNode.sethScore(heuristic);
+					//System.err.println(childNode.gethScore());
 					/* if a node with same state and lower f is present in the frontier, continue */
 					/* otherwise, add---or replace with---this */
 					if(!isIn(frontier, childNode) || frontier.removeIf(node -> node.sameStateOf(childNode) && node.getfScore() > childNode.getfScore()))
