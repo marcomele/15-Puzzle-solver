@@ -40,8 +40,7 @@ public class Puzzle {
 						
 				System.out.println("Performing search...");
 				State solution = AStarSearch(initialState, heuristic);
-				System.out.println("\nSolution found in " + solution.getgScore() + " steps:");
-				System.out.println(solution);
+				System.out.println("\nSolution found in " + solution.getgScore() + " steps.");
 				
 				long endTime = System.currentTimeMillis();
 				long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
