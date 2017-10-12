@@ -128,6 +128,13 @@ public class Puzzle {
 		return false;
 	}
 	
+	/**
+	 * Checks whether a node is in the frontier, ignoring nodes dissimilarity in fScore.
+	 * @param set A {@link PriorityQueue} of states
+	 * @param node A {@link State} representation
+	 * @return {@code true} if the set contains the node, {@code false} otherwise.
+	 */
+	
 	private static boolean isIn(PriorityQueue<State> pq, State state) {
 		return isIn(pq.stream().collect(Collectors.toSet()), state);
 	}
