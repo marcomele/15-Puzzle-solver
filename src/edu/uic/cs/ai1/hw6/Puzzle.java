@@ -46,7 +46,7 @@ public class Puzzle {
 				long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 				
 				System.out.println("\nExecution terminated in " + (endTime - startTime) + "ms");
-				System.out.println("Memory used: " + (memoryAfter - memoryBefore) / 1024 + "KB");
+				System.out.println("Memory used: " + Math.floorDiv(memoryAfter - memoryBefore, 1024) + "KB");
 				if(totalBefore != Runtime.getRuntime().totalMemory())
 					System.err.println("The memory measure is wrong!");
 			} catch (NoSolutionException e) {
@@ -89,9 +89,9 @@ public class Puzzle {
 		while(!frontier.isEmpty()) {
 			/* get the best node in the frontiers, based on f = g + h */
 			State currentNode = frontier.pollFirst();
-			explored.add(currentNode);
 			if(currentNode.isSolution())
 				return currentNode;
+			explored.add(currentNode);
 			/* exploit each possible actions for the current node */
 			for(Direction direction : Direction.values()) {
 				try {
@@ -99,9 +99,10 @@ public class Puzzle {
 					/* check if already explored */
 					if(isIn(explored, childNode))
 						continue;
+					/* apply metrics */
 					childNode.setgScore(currentNode.getgScore() + 1);
 					childNode.sethScore(heuristic);
-					//System.err.println(childNode.gethScore());
+					System.err.println(childNode.getfScore());
 					/* if a node with same state and lower f is present in the frontier, continue */
 					/* otherwise, add---or replace with---this */
 					if(!isIn(frontier, childNode) || frontier.removeIf(node -> node.sameStateOf(childNode) && node.getfScore() > childNode.getfScore()))
